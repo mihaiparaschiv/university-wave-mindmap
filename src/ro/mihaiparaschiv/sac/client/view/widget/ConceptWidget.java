@@ -4,6 +4,7 @@ import ro.mihaiparaschiv.sac.client.model.Concept;
 
 import com.allen_sauer.gwt.dnd.client.HasDragHandle;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -14,7 +15,8 @@ public class ConceptWidget extends Composite implements HasDragHandle {
 	private final ConceptNameWidget nameWidget;
 	private final AdditionHandle additionHandle;
 	private final ConceptRemovalWidget removalWidget;
-	private final VerticalPanel panel;
+	private final VerticalPanel mainContainer;
+	private final HorizontalPanel toolsContainer;
 
 	public ConceptWidget(Concept concept) {
 		this.concept = concept;
@@ -23,17 +25,25 @@ public class ConceptWidget extends Composite implements HasDragHandle {
 		setText(concept.getName().getValue());
 
 		dragHandle = new Label(":::::::");
-		additionHandle = new AdditionHandle(this);
-
+		dragHandle.addStyleName("concept-drag-handle");
+		
 		removalWidget = new ConceptRemovalWidget(this);
+		removalWidget.addStyleName("concept-removal-widget");
+		
+		additionHandle = new AdditionHandle(this);
+		additionHandle.addStyleName("concept-addition-handle");
 
-		panel = new VerticalPanel();
-		panel.add(dragHandle);
-		panel.add(nameWidget);
-		panel.add(additionHandle);
-		panel.add(removalWidget);
+		toolsContainer = new HorizontalPanel();
+		toolsContainer.add(dragHandle);
+		toolsContainer.add(removalWidget);
+		toolsContainer.add(additionHandle);
+		
+		mainContainer = new VerticalPanel();
+		mainContainer.addStyleName("concept-container");
+		mainContainer.add(nameWidget);
+		mainContainer.add(toolsContainer);
 
-		initWidget(panel);
+		initWidget(mainContainer);
 	}
 
 	public void setText(String value) {
@@ -62,6 +72,6 @@ public class ConceptWidget extends Composite implements HasDragHandle {
 	}
 
 	public void retrieveAdditionHandler() {
-		panel.add(additionHandle);
+		toolsContainer.add(additionHandle);
 	}
 }

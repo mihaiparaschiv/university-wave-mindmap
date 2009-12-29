@@ -1,19 +1,36 @@
 @CHARSET "UTF-8";
 
 .dragdrop-dropTarget-engage {
-  background-color: #E0E8FF;
+	background-color: #E0E8FF;
 }
 
 .getting-started-label {
-  border: 1px solid #99AACC;
-  background-color: #AACCFF;
-  padding: 0.1em;
+	border: 1px solid #99AACC;
+	background-color: #AACCFF;
+	padding: 0.1em;
 }
 
 .getting-started-blue {
-  border: 1px solid blue;
+	border: 1px solid blue;
 }
 
 .gwt-diagrams-line {
 	cursor: pointer;
+}
+
+.concept-container {
+	border-style: solid;
+	border-width: 1px;
+}
+
+.concept-drag-handle {
+	padding-right: 1em;
+}
+
+.concept-removal-widget {
+	cursor: pointer;
+}
+
+.concept-addition-handle {
+	
 }

@@ -12,12 +12,12 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
  * Handles the operations for an active connection between a concept widget and
  * it's addition handle.
  */
-public class ConnectionController {
+public class ConnectionHandler {
 	private final AbsolutePanel panel;
 	private Connection connection;
 	private AdditionHandle additionHandle;
 
-	public ConnectionController(AbsolutePanel panel) {
+	public ConnectionHandler(AbsolutePanel panel) {
 		this.panel = panel;
 	}
 	

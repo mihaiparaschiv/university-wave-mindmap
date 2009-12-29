@@ -24,7 +24,7 @@ import ro.mihaiparaschiv.sac.client.model.ConceptProperty;
 import ro.mihaiparaschiv.sac.client.model.Link;
 import ro.mihaiparaschiv.sac.client.view.dnd.ConceptAddDropController;
 import ro.mihaiparaschiv.sac.client.view.dnd.ConceptMoveDropController;
-import ro.mihaiparaschiv.sac.client.view.dnd.ConnectionController;
+import ro.mihaiparaschiv.sac.client.view.dnd.ConnectionHandler;
 import ro.mihaiparaschiv.sac.client.view.dnd.LinkAddDropController;
 import ro.mihaiparaschiv.sac.client.view.widget.ConceptNameWidget;
 import ro.mihaiparaschiv.sac.client.view.widget.ConceptRemovalWidget;
@@ -34,6 +34,7 @@ import ro.mihaiparaschiv.sac.client.view.widget.LinkWidget;
 import ro.mihaiparaschiv.sac.client.view.widget.LinkWidgetFactory;
 
 import com.allen_sauer.gwt.dnd.client.PickupDragController;
+import com.allen_sauer.gwt.dnd.client.drop.DropController;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -50,11 +51,12 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 	private final LinkWidgetFactory linkWidgetFactory;
 
 	private PickupDragController conceptDragController;
-	private ConceptMoveDropController conceptDropController;
+	private ConceptMoveDropController conceptMoveDropController;
 	private PickupDragController actionDragController;
 	private ConceptAddDropController conceptAddDropController;
+	private HashMap<ConceptWidget, LinkAddDropController> linkAddDropControllers;
 	private EventHandler eventHandler;
-	private ConnectionController connectionController;
+	private ConnectionHandler connectionHandler;
 
 	public DiagramPresenter(Display display, EventBus eventBus) {
 		super(display, eventBus);
@@ -86,7 +88,7 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 
 	public void updateLinks(Concept concept) {
 		// TODO Update only if we need to.
-		connectionController.reset();
+		connectionHandler.reset();
 
 		for (Link l : concept.getLinks()) {
 			getLinkWidget(l).update();
@@ -101,10 +103,15 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 		getDiagramPanel().add(cw, concept.getPosition().getX(),
 				concept.getPosition().getY());
 
+		// prepare for drag and drop
 		conceptDragController.makeDraggable(cw);
 		actionDragController.makeDraggable(cw.getAdditionHandle());
-		actionDragController.registerDropController(new LinkAddDropController(
-				cw, eventBus, connectionController));
+
+		// make the concept widget a drop target
+		LinkAddDropController dc = new LinkAddDropController(cw, eventBus,
+				connectionHandler);
+		linkAddDropControllers.put(cw, dc);
+		actionDragController.registerDropController(dc);
 
 		cw.getNameWidget().addValueChangeHandler(eventHandler);
 		cw.getRemovalWidget().addClickHandler(eventHandler);
@@ -124,8 +131,15 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 	}
 
 	protected void removeConcept(Concept concept) {
-		connectionController.reset();
-		ConceptWidget cw = conceptWidgets.remove(concept);
+		ConceptWidget cw = conceptWidgets.get(concept);
+		
+		// unregister the widget
+		DropController dc = linkAddDropControllers.get(cw);
+		actionDragController.unregisterDropController(dc);
+		
+		// remove the widget
+		connectionHandler.reset();
+		conceptWidgets.remove(concept);
 		getDiagramPanel().remove(cw);
 	}
 
@@ -149,19 +163,24 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 		DiagramPanel panel = getDiagramPanel();
 		panel.addDoubleClickHandler(eventHandler);
 
-		conceptDropController = new ConceptMoveDropController(this, eventBus);
+		// concept moving - target: diagram panel
+		conceptMoveDropController = new ConceptMoveDropController(this, eventBus);
 		conceptDragController = new PickupDragController(panel, true);
 		conceptDragController.setBehaviorConstrainedToBoundaryPanel(false);
 		conceptDragController.setBehaviorMultipleSelection(true);
-		conceptDragController.registerDropController(conceptDropController);
+		conceptDragController.registerDropController(conceptMoveDropController);
 
-		connectionController = new ConnectionController(getDiagramPanel());
+		// concept building - target: diagram panel
+		connectionHandler = new ConnectionHandler(getDiagramPanel());
 		conceptAddDropController = new ConceptAddDropController(panel,
-				eventBus, connectionController);
+				eventBus, connectionHandler);
 		actionDragController = new PickupDragController(panel, true);
 		actionDragController.setBehaviorConstrainedToBoundaryPanel(false);
 		actionDragController.setBehaviorMultipleSelection(false);
 		actionDragController.registerDropController(conceptAddDropController);
+		
+		// link / concept building - target: concept widget
+		linkAddDropControllers = new HashMap<ConceptWidget, LinkAddDropController>();
 	}
 
 	@Override
@@ -228,7 +247,8 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 			} else if (s instanceof ConceptRemovalWidget) {
 				ConceptWidget cw = ((ConceptRemovalWidget) s)
 						.getConceptWidget();
-				eventBus.fireEvent(new ConceptRemoveRequestEvent(cw.getConcept()));
+				eventBus.fireEvent(new ConceptRemoveRequestEvent(cw
+						.getConcept()));
 			}
 		}
 
@@ -253,8 +273,8 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 
 			if (s instanceof ConceptNameWidget) {
 				ConceptWidget cw = ((ConceptNameWidget) s).getConceptWidget();
-				eventBus.fireEvent(new ConceptChangeRequestEvent(cw.getConcept(),
-						new ConceptName(event.getValue())));
+				eventBus.fireEvent(new ConceptChangeRequestEvent(cw
+						.getConcept(), new ConceptName(event.getValue())));
 			}
 		}
 	}

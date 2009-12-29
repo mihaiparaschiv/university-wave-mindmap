@@ -13,7 +13,8 @@ import com.allen_sauer.gwt.dnd.client.drop.AbsolutePositionDropController;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Handles concept position changes resulting from drag and drop operations.
+ * Handles concept position changes resulting from drag and drop operations. The
+ * drop target is the diagram panel.
  */
 public class ConceptMoveDropController extends AbsolutePositionDropController {
 	private DiagramPresenter presenter;

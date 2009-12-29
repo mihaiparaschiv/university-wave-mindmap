@@ -12,14 +12,15 @@ import com.allen_sauer.gwt.dnd.client.drop.AbsolutePositionDropController;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 
 /**
- * Handles concept creation by drag and drop of addition handles.
+ * Handles concept creation by drag and drop of addition handles. The drop
+ * target is the diagram panel.
  */
 public class ConceptAddDropController extends AbsolutePositionDropController {
 	private EventBus eventBus;
-	private ConnectionController connectionController;
+	private ConnectionHandler connectionController;
 
 	public ConceptAddDropController(AbsolutePanel panel, EventBus eventBus,
-			ConnectionController connectionController) {
+			ConnectionHandler connectionController) {
 		super(panel);
 		this.eventBus = eventBus;
 		this.connectionController = connectionController;
@@ -47,7 +48,8 @@ public class ConceptAddDropController extends AbsolutePositionDropController {
 		// add a new concept
 		int x = ah.getAbsoluteLeft() - ah.getParent().getAbsoluteLeft();
 		int y = ah.getAbsoluteTop() - ah.getParent().getAbsoluteTop();
-		eventBus.fireEvent(new ConceptAddRequestEvent(concept, new ConceptName("concept name"), //
+		eventBus.fireEvent(new ConceptAddRequestEvent(concept, new ConceptName(
+				"concept name"), //
 				new ConceptPosition(x, y)));
 
 		connectionController.reset();

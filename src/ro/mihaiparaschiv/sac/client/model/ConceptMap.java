@@ -53,6 +53,8 @@ public class ConceptMap {
 	public Link getLink(LinkId id) {
 		Concept startConcept = getConcept(id.getStartConceptId());
 		Concept endConcept = getConcept(id.getEndConceptId());
+		if (startConcept == null || endConcept == null)
+			return null;
 		return links.get(startConcept).get(endConcept);
 	}
 }

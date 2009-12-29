@@ -6,7 +6,7 @@ public class AdditionHandle extends Label {
 	private ConceptWidget conceptWidget;
 
 	public AdditionHandle(ConceptWidget conceptWidget) {
-		super("+");
+		super("add");
 		this.conceptWidget = conceptWidget;
 	}
 

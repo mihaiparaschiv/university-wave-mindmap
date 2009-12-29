@@ -6,7 +6,7 @@ public class ConceptRemovalWidget extends Label {
 	private ConceptWidget conceptWidget;
 
 	public ConceptRemovalWidget(ConceptWidget conceptWidget) {
-		super("-");
+		super("del");
 		this.conceptWidget = conceptWidget;
 	}
 

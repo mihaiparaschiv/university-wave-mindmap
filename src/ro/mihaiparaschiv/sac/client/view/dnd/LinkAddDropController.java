@@ -10,14 +10,15 @@ import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.drop.SimpleDropController;
 
 /**
- * Handles the dropping of addition handles over concepts.
+ * Handles the dropping of addition handles over concepts. The drop target is a
+ * concept widget.
  */
 public class LinkAddDropController extends SimpleDropController {
 	private EventBus eventBus;
-	private ConnectionController connectionController;
+	private ConnectionHandler connectionController;
 
 	public LinkAddDropController(ConceptWidget conceptWidget,
-			EventBus eventBus, ConnectionController connectionController) {
+			EventBus eventBus, ConnectionHandler connectionController) {
 		super(conceptWidget);
 		this.eventBus = eventBus;
 		this.connectionController = connectionController;
