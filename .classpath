@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dnd-2.6.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-diagrams-0.2-RC00.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-1.0-20090622.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-presenter-1.0.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cobogwave-gadget-1.0.3.3.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-gadgets.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
