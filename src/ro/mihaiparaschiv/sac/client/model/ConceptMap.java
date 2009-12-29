@@ -43,8 +43,16 @@ public class ConceptMap {
 	protected HashMap<Concept, Link> getLinkMap(Concept concept) {
 		return links.get(concept);
 	}
+	
+	/* PUBLIC METHODS ********************************************************/
 
 	public Concept getConcept(ConceptId id) {
 		return concepts.get(id);
+	}
+
+	public Link getLink(LinkId id) {
+		Concept startConcept = getConcept(id.getStartConceptId());
+		Concept endConcept = getConcept(id.getEndConceptId());
+		return links.get(startConcept).get(endConcept);
 	}
 }

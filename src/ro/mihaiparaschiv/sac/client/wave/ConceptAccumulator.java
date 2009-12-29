@@ -1,11 +1,17 @@
 package ro.mihaiparaschiv.sac.client.wave;
 
+import ro.mihaiparaschiv.sac.client.model.ConceptId;
 import ro.mihaiparaschiv.sac.client.model.ConceptName;
 import ro.mihaiparaschiv.sac.client.model.ConceptPosition;
 
 class ConceptAccumulator extends WaveModelAccumulator {
+	private final ConceptId id;
 	private ConceptName name = null;
 	private ConceptPosition position = null;
+
+	public ConceptAccumulator(ConceptId id) {
+		this.id = id;
+	}
 
 	@Override
 	public boolean isComplete() {

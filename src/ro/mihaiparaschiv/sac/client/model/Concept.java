@@ -21,9 +21,9 @@ public class Concept {
 	public void remove() {
 		conceptMap.removeConcept(this);
 	}
-
-	public Link getLink(Concept concept) {
-		return conceptMap.getLinkMap(this).get(concept);
+	
+	public Link getLink(Concept c2) {
+		return conceptMap.getLinkMap(this).get(c2);
 	}
 
 	public Collection<Link> getLinks() {

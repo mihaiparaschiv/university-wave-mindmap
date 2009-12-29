@@ -9,6 +9,10 @@ public class LinkId {
 		this.endConceptId = endConceptId;
 	}
 
+	public LinkId(Concept startConcept, Concept endConcept) {
+		this(startConcept.getId(), endConcept.getId());
+	}
+
 	public ConceptId getStartConceptId() {
 		return startConceptId;
 	}

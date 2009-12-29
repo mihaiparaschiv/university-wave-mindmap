@@ -12,6 +12,8 @@ import org.cobogw.gwt.waveapi.gadget.client.WaveFeature;
 import ro.mihaiparaschiv.sac.client.event.model.ConceptAddEvent;
 import ro.mihaiparaschiv.sac.client.event.model.ConceptChangeEvent;
 import ro.mihaiparaschiv.sac.client.event.model.ConceptRemoveEvent;
+import ro.mihaiparaschiv.sac.client.event.model.LinkAddEvent;
+import ro.mihaiparaschiv.sac.client.event.model.LinkRemoveEvent;
 import ro.mihaiparaschiv.sac.client.event.request.ConceptAddRequestEvent;
 import ro.mihaiparaschiv.sac.client.event.request.ConceptChangeRequestEvent;
 import ro.mihaiparaschiv.sac.client.event.request.ConceptRemoveRequestEvent;
@@ -25,11 +27,18 @@ import ro.mihaiparaschiv.sac.client.model.ConceptName;
 import ro.mihaiparaschiv.sac.client.model.ConceptPosition;
 import ro.mihaiparaschiv.sac.client.model.ConceptProperty;
 import ro.mihaiparaschiv.sac.client.model.Link;
+import ro.mihaiparaschiv.sac.client.model.LinkId;
 import ro.mihaiparaschiv.sac.client.model.User;
 import ro.mihaiparaschiv.sac.client.model.UserRegistry;
 
 import com.google.gwt.core.client.JsArrayString;
 
+/**
+ * This is the main controller. It handles: wave state updates (parsing and
+ * novelty detection), delta submit operations and internal model building.
+ * 
+ * TODO: Split the class.
+ */
 public class WaveController implements StateUpdateEventHandler {
 	private static final String MODEL_CONCEPT = "concept";
 	private static final String MODEL_LINK = "link";
@@ -58,7 +67,7 @@ public class WaveController implements StateUpdateEventHandler {
 		this.valueTransformer = new WaveValueTransformer();
 		this.eventHandler = new EventHandler();
 		this.oldState = new HashMap<String, String>();
-		this.accumulatorHandler = new AccumulatorHandler();
+		this.accumulatorHandler = new AccumulatorHandler(conceptMap);
 
 		wave.addStateUpdateEventHandler(this);
 		eventBus.addHandler(ConceptAddRequestEvent.TYPE, eventHandler);
@@ -89,7 +98,7 @@ public class WaveController implements StateUpdateEventHandler {
 			if (concept != null) {
 				eventBus.fireEvent(new ConceptChangeEvent(concept, name));
 			} else {
-				accumulatorHandler.getConcept(id).setName(name);
+				accumulatorHandler.assureConcept(id).setName(name);
 			}
 		} else if (type.equals(PROPERTY_POSITION)) {
 			ConceptPosition position = valueTransformer.parsePosition(value);
@@ -97,12 +106,12 @@ public class WaveController implements StateUpdateEventHandler {
 			if (concept != null) {
 				eventBus.fireEvent(new ConceptChangeEvent(concept, position));
 			} else {
-				accumulatorHandler.getConcept(id).setPosition(position);
+				accumulatorHandler.assureConcept(id).setPosition(position);
 			}
 		}
 
 		if (concept == null) {
-			ConceptAccumulator ca = accumulatorHandler.getConcept(id);
+			ConceptAccumulator ca = accumulatorHandler.assureConcept(id);
 			if (ca.isComplete()) {
 				accumulatorHandler.removeConcept(id);
 				concept = new Concept(conceptMap, id, ca.getName(), ca
@@ -112,7 +121,7 @@ public class WaveController implements StateUpdateEventHandler {
 		}
 	}
 
-	private void parseMissingConceptKey(String key) {
+	private void processMissingConceptKey(String key) {
 		String[] a = key.split(":");
 		ConceptId id = new ConceptId(userRegistry.get(a[0]), a[1]);
 
@@ -120,6 +129,11 @@ public class WaveController implements StateUpdateEventHandler {
 
 		Concept concept = conceptMap.getConcept(id);
 		if (concept != null) {
+			// TODO remove links based on wave updates
+			for (Link link : concept.getLinks()) {
+				link.remove();
+				eventBus.fireEvent(new LinkRemoveEvent(link));
+			}
 			concept.remove();
 			eventBus.fireEvent(new ConceptRemoveEvent(concept));
 		}
@@ -127,10 +141,24 @@ public class WaveController implements StateUpdateEventHandler {
 
 	private void processLink(String key) {
 		String[] a = key.split(":");
-		User startUser = userRegistry.get(a[0]);
-		String startId = a[1];
-		User endUser = userRegistry.get(a[2]);
-		String endId = a[3];
+		ConceptId startId = new ConceptId(userRegistry.get(a[0]), a[1]);
+		ConceptId endId = new ConceptId(userRegistry.get(a[2]), a[3]);
+		accumulatorHandler.assureLink(new LinkId(startId, endId));
+	}
+
+	private void processMissingLinkKey(String key) {
+		String[] a = key.split(":");
+		ConceptId startId = new ConceptId(userRegistry.get(a[0]), a[1]);
+		ConceptId endId = new ConceptId(userRegistry.get(a[2]), a[3]);
+		LinkId id = new LinkId(startId, endId);
+
+		accumulatorHandler.removeLink(id);
+
+		Link link = conceptMap.getLink(id);
+		if (link != null) {
+			link.remove();
+			eventBus.fireEvent(new LinkRemoveEvent(link));
+		}
 	}
 
 	private void processUserProperty(String key, String value) {
@@ -154,8 +182,8 @@ public class WaveController implements StateUpdateEventHandler {
 	 * @return
 	 */
 	private String buildConceptKey(ConceptId id, String propertyType) {
-		return MODEL_CONCEPT + "::" + id.getUser().getName() + ":" + id.getUserDomainId()
-				+ ":" + propertyType;
+		return MODEL_CONCEPT + "::" + id.getUser().getName() + ":"
+				+ id.getUserDomainId() + ":" + propertyType;
 	}
 
 	/**
@@ -169,6 +197,14 @@ public class WaveController implements StateUpdateEventHandler {
 		return MODEL_USER + "::" + user.getName() + ":" + propertyType;
 	}
 
+	private String buildLinkKey(LinkId id) {
+		String sn = id.getStartConceptId().getUser().getName();
+		String sid = id.getStartConceptId().getUserDomainId();
+		String en = id.getEndConceptId().getUser().getName();
+		String eid = id.getEndConceptId().getUserDomainId();
+		return MODEL_LINK + "::" + sn + ":" + sid + ":" + en + ":" + eid;
+	}
+
 	/**
 	 * Generates a concept id and updates the wave.
 	 * 
@@ -180,6 +216,17 @@ public class WaveController implements StateUpdateEventHandler {
 		String idString = Integer.toString(++userConceptCounter);
 		state.submitValue(buildUserKey(user, PROPERTY_COUNTER), idString);
 		return new ConceptId(user, idString);
+	}
+
+	/**
+	 * Creates the internal link models.
+	 */
+	private void processCompleteLinks() {
+		for (LinkAccumulator la : accumulatorHandler.getCompleteLinks()) {
+			accumulatorHandler.removeLink(la.getId());
+			Link link = new Link(conceptMap, la.getId());
+			eventBus.fireEvent(new LinkAddEvent(link));
+		}
 	}
 
 	/* EVENT HANDLING ******************************************************* */
@@ -223,9 +270,14 @@ public class WaveController implements StateUpdateEventHandler {
 			String modelKey = a[1];
 
 			if (modelType.equals(MODEL_CONCEPT)) {
-				parseMissingConceptKey(modelKey);
+				processMissingConceptKey(modelKey);
+			} else if (modelType.equals(MODEL_LINK)) {
+				processMissingLinkKey(modelKey);
 			}
 		}
+
+		// build the links
+		processCompleteLinks();
 
 		oldState = newState;
 	}
@@ -236,13 +288,21 @@ public class WaveController implements StateUpdateEventHandler {
 			ConceptName name = event.getName();
 			ConceptPosition position = event.getPosition();
 			ConceptId id = generateConceptId(wave.getState());
-			name = new ConceptName("c" + id.getUserDomainId().toString());
 
 			HashMap<String, String> delta = new HashMap<String, String>();
 			delta.put(buildConceptKey(id, PROPERTY_NAME), //
 					valueTransformer.build(name));
 			delta.put(buildConceptKey(id, PROPERTY_POSITION), //
 					valueTransformer.build(position));
+
+			Concept parentConcept = event.getParentConcept();
+			if (parentConcept != null) {
+				ConceptId startConceptId = parentConcept.getId();
+				ConceptId endConceptId = id;
+				String key = buildLinkKey(new LinkId(startConceptId,
+						endConceptId));
+				delta.put(key, "value");
+			}
 
 			wave.getState().submitDelta(delta);
 		}
@@ -277,7 +337,7 @@ public class WaveController implements StateUpdateEventHandler {
 			delta.put(buildConceptKey(id, PROPERTY_POSITION), null);
 
 			for (Link link : concept.getLinks()) {
-
+				delta.put(buildLinkKey(link.getId()), null);
 			}
 
 			wave.getState().submitDelta(delta);
@@ -285,14 +345,16 @@ public class WaveController implements StateUpdateEventHandler {
 
 		@Override
 		public void onLinkAddRequest(LinkAddRequestEvent event) {
-			// TODO Auto-generated method stub
-
+			Concept startConcept = event.getStartConcept();
+			Concept endConcept = event.getEndConcept();
+			String key = buildLinkKey(new LinkId(startConcept, endConcept));
+			wave.getState().submitValue(key, "value");
 		}
 
 		@Override
 		public void onLinkRemoveRequest(LinkRemoveRequestEvent event) {
-			// TODO Auto-generated method stub
-
+			String key = buildLinkKey(event.getLink().getId());
+			wave.getState().submitValue(key, null);
 		}
 	}
 }
