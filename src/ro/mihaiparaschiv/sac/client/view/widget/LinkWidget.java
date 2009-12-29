@@ -12,7 +12,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 public class LinkWidget extends RectilinearTwoEndedConnection implements
 		HasClickHandlers {
 
-	private Link link;
+	private final Link link;
 
 	public LinkWidget(Link link, Connector c1, Connector c2) {
 		super(c1, c2);

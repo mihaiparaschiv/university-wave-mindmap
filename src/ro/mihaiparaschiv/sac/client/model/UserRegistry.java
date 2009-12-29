@@ -9,7 +9,7 @@ import org.cobogw.gwt.waveapi.gadget.client.WaveFeature;
 public class UserRegistry implements StateUpdateEventHandler {
 	private final HashMap<String, User> users;
 	private final WaveFeature wave;
-	private User currentUser = null;
+	private User currentUser;
 
 	public UserRegistry(WaveFeature wave) {
 		this.users = new HashMap<String, User>();
@@ -26,15 +26,17 @@ public class UserRegistry implements StateUpdateEventHandler {
 	 */
 	public User get(String name) {
 		User user = users.get(name);
+		
 		if (user == null) {
-			user = users.put(name, new User(name));
+			user = new User(name);
+			users.put(name, user);
 		}
 
 		return user;
 	}
 
 	public User getCurrentUser() {
-		return currentUser;
+		return get(wave.getViewer().getId());
 	}
 
 	@Override

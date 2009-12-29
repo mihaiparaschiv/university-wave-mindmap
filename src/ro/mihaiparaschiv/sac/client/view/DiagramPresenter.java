@@ -14,6 +14,8 @@ import ro.mihaiparaschiv.sac.client.event.model.LinkAddEvent;
 import ro.mihaiparaschiv.sac.client.event.model.LinkRemoveEvent;
 import ro.mihaiparaschiv.sac.client.event.model.ModelEventHandler;
 import ro.mihaiparaschiv.sac.client.event.request.ConceptAddRequestEvent;
+import ro.mihaiparaschiv.sac.client.event.request.ConceptChangeRequestEvent;
+import ro.mihaiparaschiv.sac.client.event.request.ConceptRemoveRequestEvent;
 import ro.mihaiparaschiv.sac.client.event.request.LinkRemoveRequestEvent;
 import ro.mihaiparaschiv.sac.client.model.Concept;
 import ro.mihaiparaschiv.sac.client.model.ConceptName;
@@ -24,6 +26,8 @@ import ro.mihaiparaschiv.sac.client.view.dnd.ConceptAddDropController;
 import ro.mihaiparaschiv.sac.client.view.dnd.ConceptMoveDropController;
 import ro.mihaiparaschiv.sac.client.view.dnd.ConnectionController;
 import ro.mihaiparaschiv.sac.client.view.dnd.LinkAddDropController;
+import ro.mihaiparaschiv.sac.client.view.widget.ConceptNameWidget;
+import ro.mihaiparaschiv.sac.client.view.widget.ConceptRemovalWidget;
 import ro.mihaiparaschiv.sac.client.view.widget.ConceptWidget;
 import ro.mihaiparaschiv.sac.client.view.widget.ConceptWidgetFactory;
 import ro.mihaiparaschiv.sac.client.view.widget.LinkWidget;
@@ -35,6 +39,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 
 public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> {
@@ -94,10 +100,14 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 		conceptWidgets.put(concept, cw);
 		getDiagramPanel().add(cw, concept.getPosition().getX(),
 				concept.getPosition().getY());
+
 		conceptDragController.makeDraggable(cw);
 		actionDragController.makeDraggable(cw.getAdditionHandle());
 		actionDragController.registerDropController(new LinkAddDropController(
 				cw, eventBus, connectionController));
+
+		cw.getNameWidget().addValueChangeHandler(eventHandler);
+		cw.getRemovalWidget().addClickHandler(eventHandler);
 	}
 
 	protected void changeConcept(Concept concept, ConceptName name) {
@@ -176,16 +186,16 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 	}
 
 	private class EventHandler implements ModelEventHandler, ClickHandler,
-			DoubleClickHandler {
+			DoubleClickHandler, ValueChangeHandler<String> {
 		@Override
 		public void onConceptAdd(ConceptAddEvent event) {
 			addConcept(event.getConcept());
 		}
 
 		@Override
-		public void onConceptChange(ConceptChangeEvent conceptChangeEvent) {
-			Concept c = conceptChangeEvent.getConcept();
-			ConceptProperty p = conceptChangeEvent.getProperty();
+		public void onConceptChange(ConceptChangeEvent event) {
+			Concept c = event.getConcept();
+			ConceptProperty p = event.getProperty();
 			if (p instanceof ConceptName) {
 				changeConcept(c, (ConceptName) p);
 			} else if (p instanceof ConceptPosition) {
@@ -194,9 +204,8 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 		}
 
 		@Override
-		public void onConceptRemove(ConceptRemoveEvent conceptRemoveEvent) {
-			// TODO Auto-generated method stub
-
+		public void onConceptRemove(ConceptRemoveEvent event) {
+			removeConcept(event.getConcept());
 		}
 
 		@Override
@@ -216,6 +225,10 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 			if (s instanceof LinkWidget) {
 				LinkWidget lw = (LinkWidget) s;
 				eventBus.fireEvent(new LinkRemoveRequestEvent(lw.getLink()));
+			} else if (s instanceof ConceptRemovalWidget) {
+				ConceptWidget cw = ((ConceptRemovalWidget) s)
+						.getConceptWidget();
+				eventBus.fireEvent(new ConceptRemoveRequestEvent(cw.getConcept()));
 			}
 		}
 
@@ -231,6 +244,17 @@ public class DiagramPresenter extends WidgetPresenter<DiagramPresenter.Display> 
 				ConceptPosition position = new ConceptPosition(x, y);
 				eventBus.fireEvent(new ConceptAddRequestEvent(null, name,
 						position));
+			}
+		}
+
+		@Override
+		public void onValueChange(ValueChangeEvent<String> event) {
+			Object s = event.getSource();
+
+			if (s instanceof ConceptNameWidget) {
+				ConceptWidget cw = ((ConceptNameWidget) s).getConceptWidget();
+				eventBus.fireEvent(new ConceptChangeRequestEvent(cw.getConcept(),
+						new ConceptName(event.getValue())));
 			}
 		}
 	}

@@ -3,11 +3,11 @@ package ro.mihaiparaschiv.sac.client.wave;
 import ro.mihaiparaschiv.sac.client.model.ConceptName;
 import ro.mihaiparaschiv.sac.client.model.ConceptPosition;
 
-class WaveConceptModel extends WaveModel {
+class ConceptAccumulator extends WaveModelAccumulator {
 	private ConceptName name = null;
 	private ConceptPosition position = null;
-	private boolean removed = false;
 
+	@Override
 	public boolean isComplete() {
 		return (name != null) && (position != null);
 	}
@@ -26,14 +26,6 @@ class WaveConceptModel extends WaveModel {
 
 	public void setPosition(ConceptPosition position) {
 		this.position = position;
-	}
-	
-	public boolean isRemoved() {
-		return removed;
-	}
-	
-	public void remove() {
-		this.removed = true;
 	}
 	
 	@Override

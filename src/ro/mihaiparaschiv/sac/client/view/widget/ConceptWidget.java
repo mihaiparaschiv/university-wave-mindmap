@@ -5,40 +5,51 @@ import ro.mihaiparaschiv.sac.client.model.Concept;
 import com.allen_sauer.gwt.dnd.client.HasDragHandle;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ConceptWidget extends Composite implements HasDragHandle {
-	private Concept concept;
-	private Label dragHandle;
-	private TextBox textBox;
-	private AdditionHandle additionHandle;
-	private VerticalPanel panel;
+	private final Concept concept;
+	private final Label dragHandle;
+	private final ConceptNameWidget nameWidget;
+	private final AdditionHandle additionHandle;
+	private final ConceptRemovalWidget removalWidget;
+	private final VerticalPanel panel;
 
 	public ConceptWidget(Concept concept) {
 		this.concept = concept;
 
+		nameWidget = new ConceptNameWidget(this);
+		setText(concept.getName().getValue());
+
 		dragHandle = new Label(":::::::");
-		textBox = new TextBox();
-		textBox.setValue(concept.getName().getValue());
-		
 		additionHandle = new AdditionHandle(this);
+
+		removalWidget = new ConceptRemovalWidget(this);
 
 		panel = new VerticalPanel();
 		panel.add(dragHandle);
-		panel.add(textBox);
+		panel.add(nameWidget);
 		panel.add(additionHandle);
+		panel.add(removalWidget);
 
 		initWidget(panel);
+	}
+
+	public void setText(String value) {
+		nameWidget.setValue(value);
 	}
 
 	public Concept getConcept() {
 		return concept;
 	}
-	
-	public void setText(String value) {
-		textBox.setValue(value);
+
+	public ConceptNameWidget getNameWidget() {
+		return nameWidget;
+	}
+
+	public ConceptRemovalWidget getRemovalWidget() {
+		return removalWidget;
 	}
 
 	@Override
