@@ -9,6 +9,7 @@ public class DiagramDisplay extends Composite implements
 
 	public DiagramDisplay(int width, int height) {
 		diagramPanel = new DiagramPanel();
+		diagramPanel.addStyleName("diagram-container");
 		diagramPanel.setPixelSize(width, height);
 		initWidget(diagramPanel);
 	}

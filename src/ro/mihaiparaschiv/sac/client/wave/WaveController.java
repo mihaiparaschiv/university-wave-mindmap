@@ -129,7 +129,7 @@ public class WaveController implements StateUpdateEventHandler {
 
 		Concept concept = conceptMap.getConcept(id);
 		if (concept != null) {
-			// TODO remove links based on wave updates
+			// TODO: remove links based on wave updates
 			for (Link link : concept.getLinks()) {
 				link.remove();
 				eventBus.fireEvent(new LinkRemoveEvent(link));
@@ -202,7 +202,17 @@ public class WaveController implements StateUpdateEventHandler {
 		String sid = id.getStartConceptId().getUserDomainId();
 		String en = id.getEndConceptId().getUser().getName();
 		String eid = id.getEndConceptId().getUserDomainId();
-		return MODEL_LINK + "::" + sn + ":" + sid + ":" + en + ":" + eid;
+
+		// sort the fields so that we have only one link between two concepts
+		String c1 = sn + ":" + sid;
+		String c2 = en + ":" + eid;
+		if (c1.compareTo(c2) > 0) {
+			String aux = c1;
+			c1 = c2;
+			c2 = aux;
+		}
+
+		return MODEL_LINK + "::" + c1 + ":" + c2;
 	}
 
 	/**

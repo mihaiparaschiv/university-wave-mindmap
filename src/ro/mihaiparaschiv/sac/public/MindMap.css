@@ -1,21 +1,10 @@
-@CHARSET "UTF-8";
-
-.dragdrop-dropTarget-engage {
-	background-color: #E0E8FF;
-}
-
-.getting-started-label {
-	border: 1px solid #99AACC;
-	background-color: #AACCFF;
-	padding: 0.1em;
-}
-
-.getting-started-blue {
-	border: 1px solid blue;
-}
-
 .gwt-diagrams-line {
 	cursor: pointer;
+}
+
+.diagram-container {
+	border-style: solid;
+	border-width: 1px;
 }
 
 .concept-container {
@@ -23,14 +12,31 @@
 	border-width: 1px;
 }
 
+.concept-container.dragdrop-dropTarget-engage,
+.concept-container.dragdrop-dropTarget-engage input {
+	background-color: #E0E8FF;
+}
+
+.concept-container input {
+	border: none;
+}
+
 .concept-drag-handle {
-	padding-right: 1em;
+	margin-right: 1em;
 }
 
 .concept-removal-widget {
 	cursor: pointer;
+	margin-right: 1em;
 }
 
 .concept-addition-handle {
-	
+}
+
+.concept-tools-container {
+	font-size: 0.75 em;
+}
+
+.dragdrop-selected, .dragdrop-dragging, .dragdrop-proxy {
+	opacity: 1;
 }

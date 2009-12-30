@@ -34,6 +34,7 @@ public class ConceptWidget extends Composite implements HasDragHandle {
 		additionHandle.addStyleName("concept-addition-handle");
 
 		toolsContainer = new HorizontalPanel();
+		toolsContainer.addStyleName("concept-tools-container");
 		toolsContainer.add(dragHandle);
 		toolsContainer.add(removalWidget);
 		toolsContainer.add(additionHandle);

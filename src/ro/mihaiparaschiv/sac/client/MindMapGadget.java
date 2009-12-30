@@ -23,8 +23,8 @@ author = "Mihai Paraschiv", //
 author_email = "mihai.paraschiv@gmail.com")
 public class MindMapGadget extends WaveGadget<UserPreferences> implements
 		NeedsDynamicHeight {
-	private static final int WIDTH = 400;
-	private static final int HEIGHT = 400;
+	private static final int WIDTH = 700;
+	private static final int HEIGHT = 500;
 
 	private DynamicHeightFeature dynamicHeightFeature;
 
