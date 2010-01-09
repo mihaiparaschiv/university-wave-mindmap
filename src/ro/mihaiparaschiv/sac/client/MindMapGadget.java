@@ -15,7 +15,7 @@ import com.google.gwt.gadgets.client.DynamicHeightFeature;
 import com.google.gwt.gadgets.client.NeedsDynamicHeight;
 import com.google.gwt.gadgets.client.UserPreferences;
 import com.google.gwt.gadgets.client.Gadget.ModulePrefs;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -27,9 +27,10 @@ public class MindMapGadget extends WaveGadget<UserPreferences> implements
 		NeedsDynamicHeight {
 	private static final int WIDTH = 700;
 	private static final int HEIGHT = 500;
-	private static final String INFO = "New concept: " +
-			"double click on the map or drag the \"add\" handle on an existing concept." +
-			"New link: use the drag handle tojoin two concepts.";
+	private static final String INFO = "Create a concept: " +
+			"double click on the map or drag the \"add\" handle of an existing concept.<br/>" +
+			"Create a link: use the \"add\" handle to join two concepts.<br/>" +
+			"Remove a link: click on the link.";
 
 	private DynamicHeightFeature dynamicHeightFeature;
 
@@ -39,7 +40,7 @@ public class MindMapGadget extends WaveGadget<UserPreferences> implements
 		UserRegistry userRegistry = new UserRegistry(getWave());
 
 		VerticalPanel panel = new VerticalPanel();
-		Label info = new Label(INFO);
+		HTML info = new HTML(INFO);
 		panel.add(info);
 
 		DiagramDisplay display = new DiagramDisplay(WIDTH, HEIGHT);
