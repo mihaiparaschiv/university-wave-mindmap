@@ -1,21 +1,21 @@
 package ro.mihaiparaschiv.sac.client.model;
 
 public class User {
-	private String name;
+	private String id;
 
-	User(String name) {
-		this.name = name;
+	User(String id) {
+		this.id = id;
 	}
 
 	public String getName() {
-		return name;
+		return id;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -28,16 +28,16 @@ public class User {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return id;
 	}
 }

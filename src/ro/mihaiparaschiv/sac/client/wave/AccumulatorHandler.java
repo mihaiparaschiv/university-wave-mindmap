@@ -23,6 +23,12 @@ public class AccumulatorHandler {
 		links = new HashMap<LinkId, LinkAccumulator>();
 	}
 
+	/**
+	 * Makes sure the concept exists.
+	 * 
+	 * @param id
+	 * @return the concept with the given id
+	 */
 	public ConceptAccumulator assureConcept(ConceptId id) {
 		ConceptAccumulator ca = concepts.get(id);
 		if (ca == null) {

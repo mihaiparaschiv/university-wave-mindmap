@@ -37,6 +37,8 @@
 	font-size: 0.75 em;
 }
 
-.dragdrop-selected, .dragdrop-dragging, .dragdrop-proxy {
+.concept-container.dragdrop-selected,
+.concept-container.dragdrop-dragging,
+.concept-container.dragdrop-proxy {
 	opacity: 1;
 }

@@ -12,6 +12,10 @@ class ConceptAccumulator extends WaveModelAccumulator {
 	public ConceptAccumulator(ConceptId id) {
 		this.id = id;
 	}
+	
+	public ConceptId getId() {
+		return id;
+	}
 
 	@Override
 	public boolean isComplete() {
